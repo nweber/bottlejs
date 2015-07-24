@@ -13,9 +13,6 @@ var produce = function register(name) {
     var provider = container[providerName];
     var instance;
     if (provider) {
-        delete container[providerName];
-        delete container[name];
-
         // filter through decorators
         instance = getAllWithMapped(decorators, id, name)
             .reduce(reducer, provider.$get(container));
