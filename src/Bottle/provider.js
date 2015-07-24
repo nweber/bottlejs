@@ -78,17 +78,7 @@ var createProvider = function createProvider(name, Provider) {
         configurable : true,
         enumerable : true,
         get : function getService() {
-            var provider = container[providerName];
-            var instance;
-            if (provider) {
-                delete container[providerName];
-                delete container[name];
-
-                // filter through decorators
-                instance = getAllWithMapped(decorators, id, name)
-                    .reduce(reducer, provider.$get(container));
-            }
-            return instance ? applyMiddleware(id, name, instance, container) : instance;
+            produce(name);
         }
     };
 

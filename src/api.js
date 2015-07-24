@@ -10,13 +10,17 @@ var Bottle = function Bottle(name) {
     }
 
     this.id = id++;
-    this.container = { $register : register.bind(this) };
+    this.container = {
+        $register : register.bind(this),
+        $get : produce.bind(this)
+    };
 };
 
 /**
- * Bottle prototype
+ * Bottle prototypeproduce
  */
 Bottle.prototype = {
+    produce: produce,
     constant : constant,
     decorator : decorator,
     defer : defer,

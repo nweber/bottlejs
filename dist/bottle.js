@@ -1,7 +1,7 @@
 ;(function(undefined) {
     'use strict';
     /**
-     * BottleJS v1.0.0 - 2015-05-25
+     * BottleJS v1.0.0 - 2015-07-24
      * A powerful dependency injection micro container
      *
      * Copyright (c) 2015 Stephen Young
@@ -290,6 +290,31 @@
     };
     
     /**
+     *
+     * @param String name
+     * @return Object
+     */
+    var produce = function register(name) {
+        var providerName, container, id;
+    
+        id = this.id;
+        container = this.container;
+        providerName = name + 'Provider';
+    
+        var provider = container[providerName];
+        var instance;
+        if (provider) {
+            delete container[providerName];
+            delete container[name];
+    
+            // filter through decorators
+            instance = getAllWithMapped(decorators, id, name)
+                .reduce(reducer, provider.$get(container));
+        }
+        return instance ? applyMiddleware(id, name, instance, container) : instance;
+    };
+    
+    /**
      * Map of nested bottles by index => name
      *
      * @type Array
@@ -369,17 +394,7 @@
             configurable : true,
             enumerable : true,
             get : function getService() {
-                var provider = container[providerName];
-                var instance;
-                if (provider) {
-                    delete container[providerName];
-                    delete container[name];
-    
-                    // filter through decorators
-                    instance = getAllWithMapped(decorators, id, name)
-                        .reduce(reducer, provider.$get(container));
-                }
-                return instance ? applyMiddleware(id, name, instance, container) : instance;
+                produce(name);
             }
         };
     
@@ -520,13 +535,17 @@
         }
     
         this.id = id++;
-        this.container = { $register : register.bind(this) };
+        this.container = {
+            $register : register.bind(this),
+            $get : produce.bind(this)
+        };
     };
     
     /**
-     * Bottle prototype
+     * Bottle prototypeproduce
      */
     Bottle.prototype = {
+        produce: produce,
         constant : constant,
         decorator : decorator,
         defer : defer,
