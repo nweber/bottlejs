@@ -41,6 +41,24 @@ var applyMiddleware = function applyMiddleware(id, name, instance, container) {
     return container[name];
 };
 
+var getWithMiddlewear = function (id, name, instance, middleware) {
+    middleware = middleware || getAllWithMapped(middles, id, name);
+    if (middleware.length) {
+        var recurseApplyMiddlewear = function() {
+            var index = 0;
+            var next = function nextMiddleware() {
+                if (middleware[index]) {
+                    middleware[index++](instance, next);
+                }
+            };
+            next();
+        };
+        recurseApplyMiddlewear();
+    }
+    return instance;
+};
+
+
 /**
  * Register middleware.
  *

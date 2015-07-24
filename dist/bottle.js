@@ -248,6 +248,24 @@
         return container[name];
     };
     
+    var getWithMiddlewear = function (id, name, instance, middleware) {
+        middleware = middleware || getAllWithMapped(middles, id, name);
+        if (middleware.length) {
+            var recurseApplyMiddlewear = function() {
+                var index = 0;
+                var next = function nextMiddleware() {
+                    if (middleware[index]) {
+                        middleware[index++](instance, next);
+                    }
+                };
+                next();
+            };
+            recurseApplyMiddlewear();
+        }
+        return instance;
+    };
+    
+    
     /**
      * Register middleware.
      *
@@ -294,7 +312,8 @@
      * @param String name
      * @return Object
      */
-    var produce = function register(name) {
+    var produce = function register(name, apply) {
+        apply = apply || false;
         var providerName, container, id;
     
         id = this.id;
@@ -308,7 +327,17 @@
             instance = getAllWithMapped(decorators, id, name)
                 .reduce(reducer, provider.$get(container));
         }
-        return instance ? applyMiddleware(id, name, instance, container) : instance;
+    
+        if (instance) {
+            if (apply) {
+                instance = applyMiddleware(id, name, instance, container);
+            }
+            else {
+                instance = getWithMiddlewear(id, name, instance);
+            }
+        }
+    
+        return instance;
     };
     
     /**

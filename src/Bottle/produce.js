@@ -3,7 +3,8 @@
  * @param String name
  * @return Object
  */
-var produce = function register(name) {
+var produce = function register(name, apply) {
+    apply = apply || false;
     var providerName, container, id;
 
     id = this.id;
@@ -17,5 +18,15 @@ var produce = function register(name) {
         instance = getAllWithMapped(decorators, id, name)
             .reduce(reducer, provider.$get(container));
     }
-    return instance ? applyMiddleware(id, name, instance, container) : instance;
+
+    if (instance) {
+        if (apply) {
+            instance = applyMiddleware(id, name, instance, container);
+        }
+        else {
+            instance = getWithMiddlewear(id, name, instance);
+        }
+    }
+
+    return instance;
 };
